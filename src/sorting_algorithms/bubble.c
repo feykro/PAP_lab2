@@ -4,8 +4,6 @@
 #include <string.h>
 
 #include <x86intrin.h>
-#include <unistd.h>
-#include <pthread.h>
 
 #include "sorting.h"
 

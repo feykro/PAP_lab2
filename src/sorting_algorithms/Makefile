@@ -8,7 +8,8 @@ LDFLAGS += -L /usr/local/opt/libomp/lib
 
 EXEC = 	bubble.run	\
 	mergesort.run	\
-	odd-even.run
+	odd-even.run	\
+	quick-sort.run
 
 HEADER_FILES = $(wildcard *.h)
 
