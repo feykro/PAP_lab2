@@ -2,7 +2,9 @@
 sorting algorithm with Pablo el magnifico.
 
 Done: bubble, merge, odd even
+
 Unfinished: quicksort
+
 Todo: speed measurements
 
 # Ressource
