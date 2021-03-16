@@ -6,55 +6,54 @@
 #include <x86intrin.h>
 #include <stdbool.h>
 
+#include <stdlib.h>
 #include "sorting.h"
 
 #define MAX_THREADS 4
 
-void quicksort(uint64_t *T, int first, int last){
-    int i, j, pivot, temp;
+void swap(uint64_t *a, uint64_t *b) {
+  int t = *a;
+  *a = *b;
+  *b = t;
+}
 
-    if(first<last){
-        //il me semble que ça on devrait le randomiser
-        pivot=first;
-        i=first;
-        j=last;
 
-        while(i<j){
-            while(T[i] <= T[pivot] && i<last){
-                i++;
-            }
-                
-            while(T[j]>T[pivot]){
-                j--;
-            }
-                
-            if(i<j){
-                temp=T[i];
-                T[i]=T[j];
-                T[j]=temp;
-            }
+int partition(uint64_t * T, int first, int last) {
+    int pivot = T[last];
+    int i = (first - 1);
+
+    for (int j=first; j < last; j++) {
+        if (T[j] <= pivot) {
+        i++;
+        swap(&T[i], &T[j]);
         }
+    }
 
-        temp=T[pivot];
-        T[pivot]=T[j];
-        T[j]=temp;
-        quicksort(T,first,j-1);
-        quicksort(T,j+1,last);
+    swap(&T[i+1], &T[last]);
+    return (i+1);
+}
+
+void quickSort(uint64_t * T, int first, int last) {
+    if (first < last) {
+        int pivot = partition(T, first, last);
+        quickSort(T, first, pivot - 1);
+        quickSort(T, pivot + 1, last);
     }
 }
 
-void sequential_quick_sort (uint64_t *T, const uint64_t size){
-    quicksort(T, 0, size-1);
+
+void sequential_quick_sort (uint64_t *T, int size){
+    quickSort(T, 0, size-1);
     return;
 }
 
-void parallel_quick_sort (uint64_t *T, const uint64_t size){
+void parallel_quick_sort (uint64_t *T, int size){
     //actuellement c'est de la merde mais apparemment il faut
     //écrire une fonction de partionnement et faire deux appels
     //a quicksort avec pragma omp task
     omp_set_num_threads(MAX_THREADS);
     #pragma omp task shared(T)
-    quicksort(T, 0, size-1);
+    quickSort(T, 0, size-1);
 
     return;
 }
