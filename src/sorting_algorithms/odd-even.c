@@ -12,7 +12,7 @@
    odd-even sort -- sequential, parallel -- 
 */
 
-#define MAX_THREADS 4
+#define MAX_THREADS 12
 
 
 void sequential_oddeven_sort (uint64_t *T, const uint64_t size)

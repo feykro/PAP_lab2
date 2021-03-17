@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "sorting.h"
 
-#define MAX_THREADS 4
+#define MAX_THREADS 12
 
 void swap(uint64_t *a, uint64_t *b) {
   int t = *a;
@@ -17,12 +17,10 @@ void swap(uint64_t *a, uint64_t *b) {
   *b = t;
 }
 
-
-
 /**
  * Du coup on s'en sert pas vu qu'on a implémenté notre version
  */
-/*
+
 int comparInt(const void * a, const void * b){
     uint64_t inta = *((uint64_t *) a);
     uint64_t intb = *((uint64_t *) b);
@@ -32,7 +30,7 @@ int comparInt(const void * a, const void * b){
         return a < b ? -1 : 1;
     }
 }
-*/
+
 
 int partition(uint64_t * T, int first, int last) {
     int pivot = T[last];
@@ -99,6 +97,7 @@ uint64_t * quickSortChunks(uint64_t * chunksList[], int nbChunks){
 
 void sequential_quick_sort (uint64_t *T, int size){
     quickSort(T, 0, size-1);
+    //qsort((void *)T, size, sizeof(uint64_t), comparInt);  //quand on fait ça, ça ne marche pas 
     return;
 }
 
@@ -151,19 +150,8 @@ void parallel_quick_sort (uint64_t *T, int size){
         }
         
     }
-    //*T = *resultat;
+
     memcpy(T, resultat, size * sizeof(uint64_t));
-    /*
-    for(int i = 0; i<size; i++){
-        printf("%d ", T[i]);
-    }
-    printf("||\n");
-    int test = is_sorted(T, size);
-    printf("test : %d\n", test);
-    uint64_t control1[3] = {1, 2, 3};
-    uint64_t control2[3] = {3, 2, 1};
-    printf("Control positif : %d | Control negatif : %d |\n", is_sorted(control1, 3), is_sorted(control2, 3));
-    */
 
     return;
 }

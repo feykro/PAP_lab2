@@ -9,7 +9,7 @@
 
 #define MIN_PARALLEL_SIZE 256 //has to be 2**k
 #define PARALLEL_V 2 //has to be 2**k
-#define MAX_THREADS 4
+#define MAX_THREADS 12
 /* 
    Merge two sorted chunks of array T!
    The two chunks are of size size

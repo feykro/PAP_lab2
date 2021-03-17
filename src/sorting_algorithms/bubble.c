@@ -11,7 +11,7 @@
    bubble sort -- sequential, parallel --
 */
 
-#define MAX_THREADS 6
+#define MAX_THREADS 12
 
 //quick function to swap 2 elements, works much better than using the array and indexes
 void swap(uint64_t * a, uint64_t * b){
