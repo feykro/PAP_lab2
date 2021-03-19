@@ -9,107 +9,67 @@
 #include <stdlib.h>
 #include "sorting.h"
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+#define MIN_PARALLEL_SIZE 1<<10 //has to be 2**k
 #define MAX_THREADS 12
 
-void swap(uint64_t *a, uint64_t *b) {
-  int t = *a;
-  *a = *b;
-  *b = t;
-}
 
-/**
- * Du coup on s'en sert pas vu qu'on a implémenté notre version
- */
+void merge (uint64_t *T, const uint64_t size1, const uint64_t size2){
+	uint64_t *X = (uint64_t *) malloc ((size1+size2) * sizeof(uint64_t)) ;
+	
+	uint64_t i = 0 ;
+	uint64_t j = size1 ;
+	uint64_t k = 0 ;
+  
+	while ((i < size1) && (j < size1+size2)){
+		if (T[i] < T [j]){
+			X [k] = T [i] ;
+			i = i + 1 ;
+		}else{
+			X [k] = T [j] ;
+			j = j + 1 ;
+		}
+		k = k + 1 ;
+	}
+
+	if (i < size1){
+		for (; i < size1; i++, k++){
+			X [k] = T [i] ;
+		}
+	}else{
+		for (; j < size1+size2; j++, k++){
+			X [k] = T [j] ;
+		}
+	}
+	memcpy (T, X, (size1+size2)*sizeof(uint64_t)) ;
+	free (X) ;
+	
+	return ;
+}
 
 int comparInt(const void * a, const void * b){
-    uint64_t inta = *((uint64_t *) a);
-    uint64_t intb = *((uint64_t *) b);
-    if(a == b){
-        return 0;
-    }else{
-        return a < b ? -1 : 1;
-    }
+    return ( *(uint64_t*)a - *(uint64_t*)b );
 }
 
+//=======================================================
 
-int partition(uint64_t * T, int first, int last) {
-    int pivot = T[last];
-    int i = (first - 1);
-
-    for (int j=first; j < last; j++) {
-        if (T[j] <= pivot) {
-        i++;
-        swap(&T[i], &T[j]);
-        }
-    }
-
-    swap(&T[i+1], &T[last]);
-    return (i+1);
+void sequential_quickSort (uint64_t *T, int size){
+    qsort(T, size, sizeof(uint64_t), comparInt);
 }
 
-void quickSort(uint64_t * T, int first, int last) {
-    if (first < last) {
-        int pivot = partition(T, first, last);
-        quickSort(T, first, pivot - 1);
-        quickSort(T, pivot + 1, last);
-    }
-}
+void parallel_quickSort(uint64_t *T, int size){
 
-//===========================================
-
-int omegaPartition(uint64_t indices[], uint64_t entiers[], int first, int last) {
-    int pivot = entiers[last];
-    int i = (first - 1);
-
-    for (int j=first; j < last; j++) {
-        if (entiers[j] <= pivot) {
-        i++;
-        swap(&entiers[i], &entiers[j]);
-        swap(&indices[i], &indices[j]);
-        }
-    }
-
-    swap(&entiers[i+1], &entiers[last]);
-    swap(&indices[i+1], &indices[last]);
-    return (i+1);
-}
-
-void omegaQuickSort(uint64_t indices[], uint64_t entiers[], int first, int last) {
-    if (first < last) {
-        int pivot = omegaPartition(indices, entiers, first, last);
-        omegaQuickSort(indices, entiers, first, pivot - 1);
-        omegaQuickSort(indices, entiers, pivot + 1, last);
-    }
-}
-
-uint64_t * quickSortChunks(uint64_t * chunksList[], int nbChunks){
-    uint64_t * indice_list = (uint64_t *) malloc(sizeof(uint64_t)* nbChunks);
-    uint64_t first_elem_list[nbChunks];
-    for(int i=0; i<nbChunks; i++){
-        indice_list[i] = i;
-        first_elem_list[i] = chunksList[i][0];
-    }
-    omegaQuickSort(indice_list, first_elem_list, 0, nbChunks-1);
-    return indice_list;
-}
-
-//================================================
-
-void sequential_quick_sort (uint64_t *T, int size){
-    quickSort(T, 0, size-1);
-    //qsort((void *)T, size, sizeof(uint64_t), comparInt);  //quand on fait ça, ça ne marche pas 
-    return;
-}
-
-void parallel_quick_sort (uint64_t *T, int size){
-    int nbChunks = MAX_THREADS < size ? MAX_THREADS : size;
+    int nbChunks = MIN(MAX_THREADS,size);
     uint64_t chunkSize = size / nbChunks;
-    uint64_t lastChunkSize = chunkSize + size%nbChunks;
 
-    uint64_t * chunksList[nbChunks];
+    uint64_t *chunkStartList[nbChunks];
+    int chunkSizes[nbChunks];
     for(int i=0; i<nbChunks; i++){
-        chunksList[i] = &T[i*chunkSize];
+        chunkStartList[i] = &T[i*chunkSize];
+        chunkSizes[i] = chunkSize;
     }
+    chunkSizes[nbChunks-1] = chunkSize + size%nbChunks;;
 
     int condition = 1;
     int ind_chunk;
@@ -117,44 +77,32 @@ void parallel_quick_sort (uint64_t *T, int size){
     uint64_t * resultat = (uint64_t *) malloc(size * sizeof(uint64_t));
     omp_set_num_threads(nbChunks);  //better performance with this line
 
-    #pragma omp parallel default (none) shared(nbChunks, chunksList, chunkSize, lastChunkSize, nb, resultat) private(ind_chunk, size)
+    #pragma omp parallel
     {
         //here we're gonna apply one bubble to every chunk
         #pragma omp for 
         for(ind_chunk = 0; ind_chunk < nbChunks; ind_chunk++){
-            int taille = ind_chunk == nbChunks - 1 ? lastChunkSize : chunkSize;
-            quickSort(chunksList[ind_chunk], 0, taille -1);
+            sequential_quickSort(chunkStartList[ind_chunk], chunkSizes[ind_chunk]);
         }
 
-        
-        
-        //so at this point the chunks are all sorted. What we're gonna do is make an array of the
-        //first elements of each array and quicksort it along side an array of index to keep track 
-        //of the change. Then using the index, we assemble the chunks in the right order and we win
-        uint64_t * indices = quickSortChunks(chunksList, nbChunks);
-
-        //Maintenant on reconstruit l'array résultat
-
-        #pragma omp for 
-        for(ind_chunk = nbChunks -1; ind_chunk > -1; ind_chunk--){
-            int indice = indices[ind_chunk];
-            int taille = ind_chunk == nbChunks - 1 ? lastChunkSize : chunkSize;
-            uint64_t * emplacement = resultat;
-
-            if(indice <= indices[nbChunks - 1]){
-                emplacement += indice * chunkSize;
-            }else{
-                emplacement += (indice-1) * chunkSize + lastChunkSize;
+        int decal = 1;
+        while (decal < nbChunks){
+            #pragma omp for 
+            for(int i = 0; i < nbChunks ; i+=decal*2){
+                //merges two adjacent pairs
+                if (i+decal < nbChunks){
+                    merge(chunkStartList[i],chunkSizes[i],chunkSizes[i+decal]);
+                    chunkSizes[i] = chunkSizes[i]+chunkSizes[i+decal] ;
+                }
             }
-            memcpy(emplacement , chunksList[ind_chunk], taille * sizeof(uint64_t));
-        }
-        
-    }
 
-    memcpy(T, resultat, size * sizeof(uint64_t));
+            decal = decal*2;
+        }
+    }
 
     return;
 }
+//===============================================
 
 
 int main (int argc, char **argv){
@@ -174,7 +122,7 @@ int main (int argc, char **argv){
     /* the array to be sorted */
     uint64_t *X = (uint64_t *) malloc (N * sizeof(uint64_t)) ;
 
-    printf("--> Sorting an array of size %llu\n",N);
+    printf("--> Sorting an array of size %lu\n",N);
 #ifdef RINIT
     printf("--> The array is initialized randomly\n");
 #endif
@@ -189,7 +137,7 @@ int main (int argc, char **argv){
         
       
         start = _rdtsc () ;
-        sequential_quick_sort (X, N) ;
+        sequential_quickSort (X, N) ;
      
         end = _rdtsc () ;
         experiments [exp] = end - start ;
@@ -214,7 +162,7 @@ int main (int argc, char **argv){
 
     av = average_time() ;  
 
-    printf ("\n quick sort serial \t\t\t %.2lf Mcycles\n\n", (double)av/1000000) ;
+    printf ("\n quick-sort serial \t\t\t %.2lf Mcycles\n\n", (double)av/1000000) ;
 
   
     for (exp = 0 ; exp < NBEXPERIMENTS; exp++)
@@ -227,7 +175,7 @@ int main (int argc, char **argv){
         
         start = _rdtsc () ;
 
-        parallel_quick_sort (X, N) ;
+        parallel_quickSort (X, N) ;
      
         end = _rdtsc () ;
         experiments [exp] = end - start ;
@@ -251,7 +199,7 @@ int main (int argc, char **argv){
     }
     
     av = average_time() ;  
-    printf ("\n quick sort parallel \t\t %.2lf Mcycles\n\n", (double)av/1000000) ;
+    printf ("\n quick-sort parallel \t\t %.2lf Mcycles\n\n", (double)av/1000000) ;
   
     /* print_array (X, N) ; */
 
@@ -267,8 +215,8 @@ int main (int argc, char **argv){
 
     memcpy(Z, Y, N * sizeof(uint64_t));
 
-    sequential_quick_sort (Y, N) ;
-    parallel_quick_sort (Z, N) ;
+    sequential_quickSort (Y, N) ;
+    parallel_quickSort (Z, N) ;
 
     if (! are_vector_equals (Y, Z, N)) {
         fprintf(stderr, "ERROR: sorting with the sequential and the parallel algorithm does not give the same result\n") ;
