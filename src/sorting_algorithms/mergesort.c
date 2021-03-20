@@ -9,7 +9,7 @@
 
 #define MIN_PARALLEL_SIZE 1<<8 //has to be 2**k
 #define PARALLEL_V 2 //1 or 2
-#define MAX_THREADS 12
+#define MAX_THREADS 4
 /* 
    Merge two sorted chunks of array T!
    The two chunks are of size size
@@ -133,7 +133,7 @@ int main (int argc, char **argv)
     /* the array to be sorted */
     uint64_t *X = (uint64_t *) malloc (N * sizeof(uint64_t)) ;
 
-    printf("--> Sorting an array of size %lu\n",N);
+    printf("--> Sorting an array of size %llu\n",N);
 #ifdef RINIT
     printf("--> The array is initialized randomly\n");
 #endif

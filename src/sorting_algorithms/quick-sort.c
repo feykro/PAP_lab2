@@ -12,8 +12,7 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
 #define MIN_PARALLEL_SIZE 1<<10 //has to be 2**k
-#define MAX_THREADS 12
-
+#define MAX_THREADS 4
 
 void merge (uint64_t *T, const uint64_t size1, const uint64_t size2){
 	uint64_t *X = (uint64_t *) malloc ((size1+size2) * sizeof(uint64_t)) ;
@@ -59,7 +58,8 @@ void sequential_quickSort (uint64_t *T, int size){
 }
 
 void parallel_quickSort(uint64_t *T, int size){
-
+    parallel_quickSort_alt(T, size);
+    /*
     int nbChunks = MIN(MAX_THREADS,size);
     uint64_t chunkSize = size / nbChunks;
 
@@ -79,7 +79,7 @@ void parallel_quickSort(uint64_t *T, int size){
 
     #pragma omp parallel
     {
-        //here we're gonna apply one bubble to every chunk
+        //here we're gonna apply qsort to every chunk
         #pragma omp for 
         for(ind_chunk = 0; ind_chunk < nbChunks; ind_chunk++){
             sequential_quickSort(chunkStartList[ind_chunk], chunkSizes[ind_chunk]);
@@ -101,8 +101,8 @@ void parallel_quickSort(uint64_t *T, int size){
     }
 
     return;
+    */
 }
-//===============================================
 
 
 int main (int argc, char **argv){
@@ -122,7 +122,7 @@ int main (int argc, char **argv){
     /* the array to be sorted */
     uint64_t *X = (uint64_t *) malloc (N * sizeof(uint64_t)) ;
 
-    printf("--> Sorting an array of size %lu\n",N);
+    printf("--> Sorting an array of size %llu\n",N);
 #ifdef RINIT
     printf("--> The array is initialized randomly\n");
 #endif

@@ -12,7 +12,7 @@
    odd-even sort -- sequential, parallel -- 
 */
 
-#define MAX_THREADS 12
+#define MAX_THREADS 4
 
 
 void sequential_oddeven_sort (uint64_t *T, const uint64_t size)
@@ -100,7 +100,7 @@ int main (int argc, char **argv)
     /* the array to be sorted */
     uint64_t *X = (uint64_t *) malloc (N * sizeof(uint64_t)) ;
 
-    printf("--> Sorting an array of size %lu\n",N);
+    printf("--> Sorting an array of size %llu\n",N);
 #ifdef RINIT
     printf("--> The array is initialized randomly\n");
 #endif

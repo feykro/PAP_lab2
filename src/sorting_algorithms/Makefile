@@ -1,5 +1,5 @@
-CC=gcc
-#CC=clang
+#CC=gcc
+CC=clang
 CFLAGS = -O2 -fopenmp
 CFLAGS += -I/usr/local/opt/libomp/include
 LDFLAGS = -fopenmp

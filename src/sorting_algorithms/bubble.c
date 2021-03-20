@@ -11,7 +11,7 @@
    bubble sort -- sequential, parallel --
 */
 
-#define MAX_THREADS 12
+#define MAX_THREADS 4
 
 //quick function to swap 2 elements, works much better than using the array and indexes
 void swap(uint64_t * a, uint64_t * b){
@@ -107,7 +107,7 @@ int main (int argc, char **argv)
     /* the array to be sorted */
     uint64_t *X = (uint64_t *) malloc (N * sizeof(uint64_t)) ;
 
-    printf("--> Sorting an array of size %lu\n",N);
+    printf("--> Sorting an array of size %llu\n",N);
 #ifdef RINIT
     printf("--> The array is initialized randomly\n");
 #endif
