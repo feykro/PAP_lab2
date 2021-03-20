@@ -58,8 +58,7 @@ void sequential_quickSort (uint64_t *T, int size){
 }
 
 void parallel_quickSort(uint64_t *T, int size){
-    parallel_quickSort_alt(T, size);
-    /*
+    
     int nbChunks = MIN(MAX_THREADS,size);
     uint64_t chunkSize = size / nbChunks;
 
@@ -101,7 +100,6 @@ void parallel_quickSort(uint64_t *T, int size){
     }
 
     return;
-    */
 }
 
 

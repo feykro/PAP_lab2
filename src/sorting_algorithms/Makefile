@@ -1,10 +1,10 @@
+#J'ai du ajouter des flags et utiliser clang sur macOS
 #CC=gcc
 CC=clang
 CFLAGS = -O2 -fopenmp
 CFLAGS += -I/usr/local/opt/libomp/include
 LDFLAGS = -fopenmp
 LDFLAGS += -L /usr/local/opt/libomp/lib
-CPPFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
 EXEC = 	bubble.run	\
 	mergesort.run	\
