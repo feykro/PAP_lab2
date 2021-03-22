@@ -1,3 +1,4 @@
+//AUTHORS : FOCKE PABLO AND PERIN TOM
 #include <stdio.h>
 #include <omp.h>
 #include <stdint.h>
